@@ -1,0 +1,36 @@
+version: "3"
+
+services:
+  # Database service for Drupal
+  db:
+    container_name: drupaldb
+    image: mysql:5.7
+    environment:
+      MYSQL_DATABASE: drupaldb  # Name of the database to be used by Drupal
+      MYSQL_USER: phpUser  # Username for the database
+      MYSQL_PASSWORD: 1234  # Password for the database user
+      MYSQL_ROOT_PASSWORD: rootpassword  # Root password for MySQL
+    restart: always
+    volumes:
+      - drupal_db:/var/lib/mysql  # Persists database data across container restarts
+
+  # Drupal service setup
+  drupal:
+    container_name: drupal  # Names the Drupal container
+    depends_on:
+      - db  # Ensures the db service is started first before starting this service
+    image: drupal:8-apache  # Uses the official Drupal 8 image with Apache
+    restart: always
+    volumes:
+      - drupal_sites:/var/www/html/sites  # Maps the sites directory to persist site-specific data
+      - drupal_modules:/var/www/html/modules  # Maps the modules directory for custom or contributed modules
+      - drupal_profiles:/var/www/html/profiles  # Maps the profiles directory for installation profiles
+    ports:
+      - "81:80"  # Maps port 81 on the host to port 80 in the container, making the site accessible at localhost:81
+
+# Defines named volumes to be used by services
+volumes:
+  drupal_db:
+  drupal_sites:
+  drupal_modules:
+  drupal_profiles:
